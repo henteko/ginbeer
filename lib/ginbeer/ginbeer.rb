@@ -2,7 +2,6 @@ require 'time'
 require File.expand_path(File.dirname(__FILE__) + '/author.rb')
 
 class Ginbeer
-
   def initialize(dir, from="", to=Time.now)
     @dir = dir
     @from = from
