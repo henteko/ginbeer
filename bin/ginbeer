@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+
+$:.unshift File.join(File.dirname(__FILE__), *%w[.. lib])
+
+require_relative '../lib/ginbeer'
+require 'thor'
+
+class Main < Thor
+  default_command :ranking
+
+  GRAF = "■"
+
+  desc 'ranking', 'show git authors ranking'
+  #option :dir, :type => :string, :aliases => '-d', :desc => "git dir"
+  option :from, :type => :string, :aliases => '-f', :desc => "from"
+  option :to, :type => :string, :aliases => '-t', :desc => "to"
+  option :count, :type => :string, :aliases => '-c', :desc => "ranking display count"
+  option :graf, :type => :boolean, :aliases => '-g', :desc => "display graf"
+  def ranking
+    dir = Dir.pwd
+    from = options[:from] || "" 
+    to = options[:to] || ""
+    count = options[:count] || nil 
+    graf_flag = options[:graf] || false
+
+    # main
+    gb = Ginbeer.new(dir, from, to)
+    authors = gb.authors
+
+    # sort!
+    authors.sort! do |a, b|
+      b.score <=> a.score
+    end
+
+    max = nil 
+    authors.each_with_index do |author, i|
+      break if count != nil && i >= count.to_i
+      graf = nil
+      if max == nil
+        max = author.score
+        graf = 100
+      end
+      if graf == nil
+        graf = 100 * (author.score / max.to_f)
+      end
+
+      puts author.result 
+      puts GRAF * graf if graf_flag
+    end
+  end
+end
+
+Main.start
